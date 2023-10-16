@@ -61,7 +61,7 @@ public class Main {
     }
 
 
-    static void drop_database(Connection connection) throws Exception{
+    static void drop_database(Connection connection) throws Exception {
         Statement statement;
         statement = connection.createStatement();
         statement.addBatch("DROP TABLE user;");
