@@ -1,4 +1,6 @@
-package org.benevolat;
+package org.benevolat.controllers;
+
+import org.benevolat.models.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,8 +18,8 @@ public class DBManager {
                     "jdbc:mysql://srv-bdens.insa-toulouse.fr:3306/projet_gei_032",
                     "projet_gei_032", "aJuju0pu");
         }
-        catch (Exception exception) {
-            System.out.println(exception);
+        catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -36,20 +38,24 @@ public class DBManager {
         }
     }
 
-    void recreate_database() throws Exception{
-        this.drop_database();
-        this.create_database();
-        this.fill_database();
+    public void recreate_database() {
+        try {
+            this.drop_database();
+            this.create_database();
+            this.fill_database();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     // TODO gérer l'exception
-    void create_database() throws Exception{
+    private void create_database() throws SQLException{
         Statement statement;
         statement = this.connection.createStatement();
         statement.addBatch("CREATE TABLE user(id int primary key auto_increment, " +
                 "name varchar(50) not null, " +
                 "password varchar(50) not null," +
-                "type varchar(20) not null check(type in (\"Voluntary\")));");
+                "type int not null check(type in (1,2,3)));");
         statement.executeBatch();
             /*int code;
             String title;
@@ -63,28 +69,34 @@ public class DBManager {
         statement.close();
     }
 
-     void fill_database() throws Exception{
-        String[] noms = {"Claude", "Charlie", "Charlotte", "Charles"};
-        for (String nom : noms) {
-            this.add_user(nom,nom, "Voluntary");
-            //System.out.println("INSERT INTO user (name, type) VALUES (\"" + nom + "\", \"Voluntary\");");
+     private void fill_database() throws SQLException{
+        String[] names = {"Claude", "Charlie", "Charlotte", "Charles"};
+        for (String name : names) {
+            User user = new User(name, name, UserType.Voluntary);
+            this.add_user(user);
         }
     }
 
 
-    void drop_database() throws Exception {
+    private void drop_database() throws SQLException {
         Statement statement;
         statement = this.connection.createStatement();
         statement.addBatch("DROP TABLE user;");
         statement.executeBatch();
         statement.close();
+
     }
 
-    void add_user(String name, String password, String type) throws Exception {
+    public void add_user(User user) {
         Statement statement;
-        statement = this.connection.createStatement();
-        statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + name + "\",\"" + password +"\", \"" + type + "\");");
-        statement.executeBatch();
-        statement.close();
+        try {
+            statement = this.connection.createStatement();
+            statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + user.getName() + "\",\"" + user.getPassword() +"\", \"" + user.getType().ordinal() + "\");");
+            statement.executeBatch();
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
     }
 }

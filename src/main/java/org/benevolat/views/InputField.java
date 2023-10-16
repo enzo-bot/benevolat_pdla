@@ -1,11 +1,10 @@
-package org.benevolat;
+package org.benevolat.views;
 import javax.swing.*;
-import java.awt.event.*;
 
 public class InputField extends JPanel{
 //    private String title;
 //    private JLabel nom_label;
-    private JTextField name_field;
+    private final JTextField NAME_FIELD;
 
     public InputField(String title, int x, int y, int width, int height, boolean hidden) {
         super();
@@ -18,17 +17,17 @@ public class InputField extends JPanel{
 
         // Hypothèse : 15px par caractère
         if (!hidden) {
-            name_field = new JTextField(width/30);
+            NAME_FIELD = new JTextField(width/30);
         } else {
-            name_field = new JPasswordField(width/30);
+            NAME_FIELD = new JPasswordField(width/30);
         }
-        name_field.setBounds(width/2,0,width/2,height);
+        NAME_FIELD.setBounds(width/2,0,width/2,height);
 
         this.add(nom_label);
-        this.add(name_field);
+        this.add(NAME_FIELD);
     }
 
     public String getText() {
-        return this.name_field.getText();
+        return this.NAME_FIELD.getText();
     }
 }
