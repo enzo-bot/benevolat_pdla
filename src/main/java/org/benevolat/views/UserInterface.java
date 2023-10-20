@@ -18,9 +18,13 @@ public class UserInterface extends JFrame {
         addWindowListener(l);
         setSize(800,400);
 
-        SignInScreen signIn = new SignInScreen(50, 200);
-        signIn.setBounds(0, 0, this.getWidth(), this.getHeight());
-        this.add(signIn);
+//        SignInScreen signIn = new SignInScreen(50, 200);
+//        signIn.setBounds(0, 0, this.getWidth(), this.getHeight());
+//        this.add(signIn);
+
+        LogInScreen logIn = new LogInScreen(50, 200);
+        logIn.setBounds(0, 0, this.getWidth(), this.getHeight());
+        this.add(logIn);
 
         setLayout(null);
         setVisible(true);

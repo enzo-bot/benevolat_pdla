@@ -2,10 +2,7 @@ package org.benevolat.controllers;
 
 import org.benevolat.models.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DBManager {
     private Connection connection;
@@ -26,6 +23,7 @@ public class DBManager {
     public static DBManager getInstance() {
         if (DBManager.instance == null) {
             DBManager.instance = new DBManager();
+            //DBManager.instance.recreateDatabase();
         }
         return DBManager.instance;
     }
@@ -38,18 +36,18 @@ public class DBManager {
         }
     }
 
-    public void recreate_database() {
+    public void recreateDatabase() {
         try {
-            this.drop_database();
-            this.create_database();
-            this.fill_database();
+            this.dropDatabase();
+            this.createDatabase();
+            this.fillDatabase();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     // TODO gérer l'exception
-    private void create_database() throws SQLException{
+    private void createDatabase() throws SQLException{
         Statement statement;
         statement = this.connection.createStatement();
         statement.addBatch("CREATE TABLE user(id int primary key auto_increment, " +
@@ -69,16 +67,16 @@ public class DBManager {
         statement.close();
     }
 
-     private void fill_database() throws SQLException{
+     private void fillDatabase() throws SQLException{
         String[] names = {"Claude", "Charlie", "Charlotte", "Charles"};
         for (String name : names) {
             User user = new User(name, name, UserType.Voluntary);
-            this.add_user(user);
+            this.addUser(user);
         }
     }
 
 
-    private void drop_database() throws SQLException {
+    private void dropDatabase() throws SQLException {
         Statement statement;
         statement = this.connection.createStatement();
         statement.addBatch("DROP TABLE user;");
@@ -87,11 +85,11 @@ public class DBManager {
 
     }
 
-    public void add_user(User user) {
+    public void addUser(User user) {
         Statement statement;
         try {
             statement = this.connection.createStatement();
-            statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + user.getName() + "\",\"" + user.getPassword() +"\", \"" + user.getType().ordinal() + "\");");
+            statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + user.getName() + "\",\"" + user.getPassword() +"\", \"" + user.getType().getId() + "\");");
             statement.executeBatch();
             statement.close();
         } catch (SQLException e) {
@@ -99,4 +97,31 @@ public class DBManager {
         }
 
     }
+
+    public User getUser(String name, String password) throws Exception {
+        Statement statement;
+        ResultSet result;
+
+        statement = this.connection.createStatement();
+        result = statement.executeQuery("SELECT name,password,type FROM user WHERE name=\"" + name + "\" and password=\"" + password + "\";");
+
+
+
+
+        if (!result.next()) {
+            throw new Exception("no result from the query");
+        }
+
+        UserType type = UserType.fromInt(result.getInt("type"));
+
+
+        if (result.next()) {
+            throw new Exception("multiple users in the database");
+        }
+
+
+        statement.close();
+        return new User(name,password,type);
+    }
+
 }

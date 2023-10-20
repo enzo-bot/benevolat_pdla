@@ -8,6 +8,10 @@ public enum UserType {
         this.id = id;
     }
 
+    public int getId() {
+        return id;
+    }
+
     //TODO Exception spécifique
     public static UserType fromInt(int id) throws Exception{
         return switch (id) {
