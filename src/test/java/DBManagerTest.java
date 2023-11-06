@@ -44,10 +44,19 @@ public class DBManagerTest {
         }
     }
 
-    @DisplayName("Test pour l'insertion utilisateur valide")
+    @DisplayName("Test pour l'insertion utilisateur ")
     @Test
     public void insertionUserTest() {
-        //User carole = new User()
+        try {
+            User marie = new User("Marie", "Marie", UserType.Voluntary);
+            manager.addUser(marie);
+            assertEquals(marie, manager.getUser("Marie","Marie"));
+        } catch (Exception e) {
+            fail();
+        }
     }
+
+    
+
 
 }
