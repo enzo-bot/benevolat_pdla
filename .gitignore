@@ -11,6 +11,8 @@ target/
 *.iws
 *.iml
 *.ipr
+### Next line has been changed
+.idea/*
 
 ### Eclipse ###
 .apt_generated
