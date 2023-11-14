@@ -18,17 +18,22 @@ public class UserInterface extends JFrame {
         addWindowListener(l);
         setSize(800,400);
 
-//        SignInScreen signIn = new SignInScreen(50, 200);
-//        signIn.setBounds(0, 0, this.getWidth(), this.getHeight());
-//        this.add(signIn);
-
-        LogInScreen logIn = new LogInScreen(50, 200);
-        logIn.setBounds(0, 0, this.getWidth(), this.getHeight());
-        this.add(logIn);
+        FirstWindow fw = new FirstWindow(50, 200, this);
+        fw.setBounds(0, 0, this.getWidth(), this.getHeight());
+        this.add(fw);
 
         setLayout(null);
         setVisible(true);
 
+    }
+
+    public void changePanel(JPanel panel) {
+        this.remove(0);
+        panel.setBounds(0, 0, this.getWidth(), this.getHeight());
+        this.add(panel);
+
+        setLayout(null);
+        setVisible(true);
     }
 
 
