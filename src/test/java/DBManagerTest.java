@@ -33,18 +33,15 @@ public class DBManagerTest {
     @Test
     public void recuperationInvalidUserTest() {
         try {
-//            User invalidUser = new User("Bob", "LeBricoleur", UserType.Voluntary);
-            //User user = ;
             assertThrows(Exception.class, () -> {
                 manager.getUser("Bob", "LeBricoleur");
             });
-            //assertNotEquals(invalidUser, user);
         } catch (Exception e) {
             fail();
         }
     }
 
-    @DisplayName("Test pour l'insertion utilisateur ")
+    @DisplayName("Test pour l'insertion utilisateur")
     @Test
     public void insertionUserTest() {
         try {
@@ -56,7 +53,7 @@ public class DBManagerTest {
         }
     }
 
-    
+
 
 
 }
