@@ -1,13 +1,17 @@
 package org.benevolat.views;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
+public class UserInterface extends JFrame implements ActionListener{
+    private CardLayout windowChoice;
+    private Container cPane;
 
-public class UserInterface extends JFrame {
     public UserInterface() {
         super("Bénévolat");
 
+        setSize(800,400);
         WindowListener l = new WindowAdapter() {
             public void windowClosing(WindowEvent e){
 
@@ -16,28 +20,35 @@ public class UserInterface extends JFrame {
         };
 
         addWindowListener(l);
-        setSize(800,400);
+
+        this.cPane = this.getContentPane();
+
+        this.windowChoice = new CardLayout();
+        cPane.setLayout(windowChoice);
 
         FirstWindow fw = new FirstWindow(50, 200, this);
         fw.setBounds(0, 0, this.getWidth(), this.getHeight());
-        this.add(fw);
 
-        setLayout(null);
-        setVisible(true);
+        LogInScreen log = new LogInScreen(50, 200, this);
+        log.setBounds(0, 0, this.getWidth(), this.getHeight());
 
-    }
+        SignInScreen sg = new SignInScreen(50, 200, this);
+        sg.setBounds(0, 0, this.getWidth(), this.getHeight());
 
-    public void changePanel(JPanel panel) {
-        this.remove(0);
-        panel.setBounds(0, 0, this.getWidth(), this.getHeight());
-        this.add(panel);
+        cPane.add(fw);
+        cPane.add(log);
+        cPane.add(sg);
 
-        setLayout(null);
         setVisible(true);
     }
 
-
-
+    public void actionPerformed(ActionEvent e) {
+        switch (e.getActionCommand()) {
+            case "login" -> {this.windowChoice.next(this.cPane);}
+            case "signin" -> {this.windowChoice.last(this.cPane);}
+            case "firstwindow" -> {this.windowChoice.first(this.cPane);}
+        }
+    }
 
     //TODO A mettre dans un controleur
     public static void main(String [] args){

@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class SignInScreen extends JPanel {
-    public SignInScreen(int itemHeight, int itemWidth) {
+    public SignInScreen(int itemHeight, int itemWidth, ActionListener listener) {
         super();
 
         DBManager dbManager = DBManager.getInstance();
@@ -21,10 +21,19 @@ public class SignInScreen extends JPanel {
         String[] types = {"Bénévole", "Demandeur", "Valideur"};
         JComboBox type_combo = new JComboBox(types);
         type_combo.setBounds(325,100,150,30);
-        //type_combo.addItemListener(types);
 
         JButton createAccount = new JButton("Créer");
         createAccount.setBounds(350,150,100,30);
+
+        JButton goBack = new JButton("Retour");
+        goBack.setBounds(0,0,100,30);
+
+        goBack.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                listener.actionPerformed(new ActionEvent(this,0,"firstwindow"));
+            }
+        });
         createAccount.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -34,15 +43,15 @@ public class SignInScreen extends JPanel {
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
-
+                listener.actionPerformed(new ActionEvent(this,0,"firstwindow"));
 
             }
         });
 
+        this.add(goBack);
         this.add(name_field);
         this.add(password_field);
         this.add(type_combo);
         this.add(createAccount);
-
     }
 }

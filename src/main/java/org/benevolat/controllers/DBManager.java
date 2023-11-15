@@ -1,5 +1,8 @@
 package org.benevolat.controllers;
 
+import org.benevolat.MultipleUsersInDBException;
+import org.benevolat.NoUserFoundException;
+import org.benevolat.UserAlreadyExistingException;
 import org.benevolat.models.*;
 
 import java.sql.*;
@@ -71,7 +74,11 @@ public class DBManager {
         String[] names = {"Claude", "Charlie", "Charlotte", "Charles"};
         for (String name : names) {
             User user = new User(name, name, UserType.Voluntary);
-            this.addUser(user);
+            try {
+                this.addUser(user);
+            } catch (UserAlreadyExistingException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -85,40 +92,47 @@ public class DBManager {
 
     }
 
-    public void addUser(User user) {
+    public void addUser(User user) throws UserAlreadyExistingException {
         Statement statement;
         try {
-            statement = this.connection.createStatement();
-            statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + user.getName() + "\",\"" + user.getPassword() +"\", \"" + user.getType().getId() + "\");");
-            statement.executeBatch();
-            statement.close();
+            try {
+                this.getUser(user.getName(), user.getPassword());
+                throw new UserAlreadyExistingException();
+            } catch (NoUserFoundException e) {
+                statement = this.connection.createStatement();
+                statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + user.getName() + "\",\"" + user.getPassword() +"\", \"" + user.getType().getId() + "\");");
+                statement.executeBatch();
+                statement.close();
+            } catch (MultipleUsersInDBException e) {
+                throw new RuntimeException(e);
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
 
     }
 
-    public User getUser(String name, String password) throws Exception {
+    public User getUser(String name, String password) throws NoUserFoundException,MultipleUsersInDBException,SQLException {
         Statement statement;
         ResultSet result;
 
         statement = this.connection.createStatement();
         result = statement.executeQuery("SELECT name,password,type FROM user WHERE name=\"" + name + "\" and password=\"" + password + "\";");
 
-
-
-
         if (!result.next()) {
-            throw new Exception("no result from the query");
+            throw new NoUserFoundException();
         }
 
-        UserType type = UserType.fromInt(result.getInt("type"));
-
+        UserType type = null;
+        try {
+            type = UserType.fromInt(result.getInt("type"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         if (result.next()) {
-            throw new Exception("multiple users in the database");
+            throw new MultipleUsersInDBException();
         }
-
 
         statement.close();
         return new User(name,password,type);

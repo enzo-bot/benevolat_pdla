@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LogInScreen extends JPanel {
-    public LogInScreen(int itemHeight, int itemWidth) {
+    public LogInScreen(int itemHeight, int itemWidth, ActionListener listener) {
         super();
 
         DBManager dbManager = DBManager.getInstance();
@@ -32,9 +32,19 @@ public class LogInScreen extends JPanel {
             }
         });
 
+        JButton goBack = new JButton("Retour");
+        goBack.setBounds(0,0,100,30);
+
+        goBack.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                listener.actionPerformed(new ActionEvent(this,0,"firstwindow"));
+            }
+        });
+
+        this.add(goBack);
         this.add(name_field);
         this.add(password_field);
         this.add(loginButton);
-
     }
 }
