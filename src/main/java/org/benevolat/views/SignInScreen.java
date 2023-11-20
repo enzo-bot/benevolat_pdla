@@ -1,5 +1,7 @@
 package org.benevolat.views;
 
+import org.benevolat.InvalidUserTypeIdException;
+import org.benevolat.UserAlreadyExistingException;
 import org.benevolat.controllers.DBManager;
 import org.benevolat.models.User;
 import org.benevolat.models.UserType;
@@ -9,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class SignInScreen extends JPanel {
-    public SignInScreen(int itemHeight, int itemWidth, ActionListener listener) {
+    public SignInScreen(int itemHeight, int itemWidth, UserInterface ui) {
         super();
 
         DBManager dbManager = DBManager.getInstance();
@@ -31,20 +33,21 @@ public class SignInScreen extends JPanel {
         goBack.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                listener.actionPerformed(new ActionEvent(this,0,"firstwindow"));
+                ui.actionPerformed(new ActionEvent(this,0,"firstwindow"));
             }
         });
+
         createAccount.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     User user = new User(name_field.getText(), password_field.getText(), UserType.fromInt(type_combo.getSelectedIndex() + 1));
                     dbManager.addUser(user);
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    LoggedInScreen lgd = new LoggedInScreen(50, 200, user);
+                    ui.changePanel(lgd);
+                } catch (InvalidUserTypeIdException | UserAlreadyExistingException e) {
+                    throw new RuntimeException(e);
                 }
-                listener.actionPerformed(new ActionEvent(this,0,"firstwindow"));
-
             }
         });
 

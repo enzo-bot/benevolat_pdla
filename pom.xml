@@ -54,7 +54,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>org.benevolat.Main</mainClass>
+                            <mainClass>org.benevolat.controllers.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

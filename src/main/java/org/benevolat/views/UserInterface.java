@@ -24,7 +24,7 @@ public class UserInterface extends JFrame implements ActionListener{
         this.cPane = this.getContentPane();
 
         this.windowChoice = new CardLayout();
-        cPane.setLayout(windowChoice);
+        this.cPane.setLayout(this.windowChoice);
 
         FirstWindow fw = new FirstWindow(50, 200, this);
         fw.setBounds(0, 0, this.getWidth(), this.getHeight());
@@ -50,8 +50,8 @@ public class UserInterface extends JFrame implements ActionListener{
         }
     }
 
-    //TODO A mettre dans un controleur
-    public static void main(String [] args){
-        JFrame frame = new UserInterface();
+    public void changePanel(JPanel panel) {
+        this.cPane.add(panel);
+        this.windowChoice.last(this.cPane);
     }
 }

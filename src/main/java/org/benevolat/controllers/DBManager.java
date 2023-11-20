@@ -1,11 +1,13 @@
 package org.benevolat.controllers;
 
+import org.benevolat.InvalidUserTypeIdException;
 import org.benevolat.MultipleUsersInDBException;
 import org.benevolat.NoUserFoundException;
 import org.benevolat.UserAlreadyExistingException;
 import org.benevolat.models.*;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DBManager {
     private Connection connection;
@@ -57,29 +59,34 @@ public class DBManager {
                 "name varchar(50) not null, " +
                 "password varchar(50) not null," +
                 "type int not null check(type in (1,2,3)));");
+
+        statement.addBatch("CREATE TABLE request(FOREIGN KEY (`id_user`) REFERENCES user(`id`)," +
+                "id int auto_increment, " +
+                "title varchar(50) not null, " +
+                "content varchar(250) not null," +
+                "primary key(id_user, id));");
         statement.executeBatch();
-            /*int code;
-            String title;
-            while (resultSet.next()) {
-                code = resultSet.getInt("code");
-                title = resultSet.getString("title").trim();
-                System.out.println("Code : " + code
-                        + " Title : " + title);
-            }
-        resultSet.close();*/
         statement.close();
     }
 
      private void fillDatabase() throws SQLException{
         String[] names = {"Claude", "Charlie", "Charlotte", "Charles"};
         for (String name : names) {
-            User user = new User(name, name, UserType.Voluntary);
+            User user = new User(name, name, UserType.Asker);
+            Request r = new Request(user, "Ménage", "Faire le ménage");
             try {
                 this.addUser(user);
             } catch (UserAlreadyExistingException e) {
                 throw new RuntimeException(e);
             }
+            try {
+                this.addRequest(r);
+            } catch (NoUserFoundException | MultipleUsersInDBException e) {
+                throw new RuntimeException(e);
+            }
         }
+
+
     }
 
 
@@ -87,6 +94,7 @@ public class DBManager {
         Statement statement;
         statement = this.connection.createStatement();
         statement.addBatch("DROP TABLE user;");
+        statement.addBatch("DROP TABLE request;");
         statement.executeBatch();
         statement.close();
 
@@ -100,7 +108,8 @@ public class DBManager {
                 throw new UserAlreadyExistingException();
             } catch (NoUserFoundException e) {
                 statement = this.connection.createStatement();
-                statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + user.getName() + "\",\"" + user.getPassword() +"\", \"" + user.getType().getId() + "\");");
+                statement.addBatch("INSERT INTO user (name,password,type) VALUES (\"" + user.getName() +
+                        "\",\"" + user.getPassword() +"\", \"" + user.getType().getId() + "\");");
                 statement.executeBatch();
                 statement.close();
             } catch (MultipleUsersInDBException e) {
@@ -109,7 +118,60 @@ public class DBManager {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
 
+    public void addRequest(Request request) throws NoUserFoundException,MultipleUsersInDBException {
+        Statement statement;
+        try {
+            statement = this.connection.createStatement();
+            ResultSet result = statement.executeQuery("SELECT id FROM user WHERE name=\"" + request.getAsker().getName() +
+                    "\" and password=\"" + request.getAsker().getPassword() + "\";");
+            if (!result.next()) {
+                throw new NoUserFoundException();
+            }
+            statement.close();
+
+
+            statement = this.connection.createStatement();
+            statement.addBatch("INSERT INTO request (id_user,title,content) VALUES (\"" + result.getInt("id") + "\",\"" +
+                    request.getTitle() +"\", \"" + request.getContent() + "\");");
+
+            if (result.next()) {
+                throw new MultipleUsersInDBException();
+            }
+            statement.executeBatch();
+            statement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ArrayList<Request> getAllRequestFromUser(User user)  throws NoUserFoundException,MultipleUsersInDBException {
+        Statement statement;
+        ArrayList<Request> res = new ArrayList<>();
+        try {
+            statement = this.connection.createStatement();
+            ResultSet result = statement.executeQuery("SELECT id FROM user WHERE name=\"" + user.getName() +
+                    "\" and password=\"" + user.getPassword() + "\";");
+            if (!result.next()) {
+                throw new NoUserFoundException();
+            }
+            statement.close();
+
+            statement = this.connection.createStatement();
+            ResultSet result2 = statement.executeQuery("SELECT (title, content) FROM request WHERE id_user=\"" + result.getInt("id") + "\";");
+            while (result2.next()) {
+                res.add(new Request(user, result2.getString("title"), result2.getString("content")));
+            }
+
+            if (result.next()) {
+                throw new MultipleUsersInDBException();
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return res;
     }
 
     public User getUser(String name, String password) throws NoUserFoundException,MultipleUsersInDBException,SQLException {
@@ -117,7 +179,8 @@ public class DBManager {
         ResultSet result;
 
         statement = this.connection.createStatement();
-        result = statement.executeQuery("SELECT name,password,type FROM user WHERE name=\"" + name + "\" and password=\"" + password + "\";");
+        result = statement.executeQuery("SELECT name,password,type FROM user WHERE name=\"" + name +
+                "\" and password=\"" + password + "\";");
 
         if (!result.next()) {
             throw new NoUserFoundException();
@@ -126,7 +189,7 @@ public class DBManager {
         UserType type = null;
         try {
             type = UserType.fromInt(result.getInt("type"));
-        } catch (Exception e) {
+        } catch (InvalidUserTypeIdException e) {
             throw new RuntimeException(e);
         }
 

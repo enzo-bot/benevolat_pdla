@@ -9,10 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LogInScreen extends JPanel {
-    public LogInScreen(int itemHeight, int itemWidth, ActionListener listener) {
+    public LogInScreen(int itemHeight, int itemWidth, UserInterface ui) {
         super();
 
         DBManager dbManager = DBManager.getInstance();
+
 
         InputField name_field = new InputField("Nom",(this.getWidth()-itemWidth)/2,0, itemWidth,itemHeight, false);
 
@@ -25,7 +26,8 @@ public class LogInScreen extends JPanel {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     User user = dbManager.getUser(name_field.getText(), password_field.getText());
-                    System.out.println("User logged");
+                    LoggedInScreen lgd = new LoggedInScreen(50, 200, user);
+                    ui.changePanel(lgd);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -38,7 +40,7 @@ public class LogInScreen extends JPanel {
         goBack.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                listener.actionPerformed(new ActionEvent(this,0,"firstwindow"));
+                ui.actionPerformed(new ActionEvent(this,0,"firstwindow"));
             }
         });
 
